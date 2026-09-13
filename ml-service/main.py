@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -15,9 +16,14 @@ app = FastAPI(title="FINO AI - ML Service")
 # CORS
 # =========================================================
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:5000")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        FRONTEND_URL,
+        BACKEND_URL,
         "http://localhost:5173",
         "http://localhost:5000"
     ],

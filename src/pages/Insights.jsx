@@ -5,7 +5,7 @@ import {
 } from "recharts";
 import { AlertTriangle, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
-const ML_BASE_URL = "http://localhost:8000";
+const ML_BASE_URL = import.meta.env.VITE_ML_URL;
 
 export default function Insights() {
   const { user } = useUser();
@@ -20,7 +20,7 @@ export default function Insights() {
 
     async function loadInsights() {
       try {
-        const expensesRes = await fetch(`http://localhost:5000/api/expenses/${user.id}`);
+        const expensesRes = await fetch(`${import.meta.env.VITE_API_URL}/api/expenses/${user.id}`);
         const expensesData = await expensesRes.json();
         const expenses = expensesData.expenses || expensesData;
         console.log("EXPENSES BEING SENT:", expenses);

@@ -11,6 +11,9 @@ import {
   AlertTriangle, Lightbulb, Bot
 } from 'lucide-react'
 
+const API_URL = import.meta.env.VITE_API_URL
+const ML_URL = import.meta.env.VITE_ML_URL
+
 const COLORS = ['#38bdf8', '#818cf8', '#fbbf24', '#fb7185', '#a78bfa', '#34d399']
 
 const formatCurrency = (num) =>
@@ -68,7 +71,7 @@ function Dashboard() {
   const fetchExpenses = async () => {
     setLoading(true)
     try {
-      const res = await axios.get(`http://localhost:5000/api/expenses/${user.id}`)
+      const res = await axios.get(`${API_URL}/api/expenses/${user.id}`)
       const data = res.data.expenses
 
       setExpenses(data)
@@ -105,13 +108,13 @@ function Dashboard() {
     setMlLoading(true)
     setMlError(false)
     try {
-      const predRes = await axios.post('http://localhost:8000/predict', { user_id: user.id, expenses: data })
+      const predRes = await axios.post(`${ML_URL}/predict`, { user_id: user.id, expenses: data })
       setPrediction(predRes.data)
 
-      const anomalyRes = await axios.post('http://localhost:8000/anomalies', { user_id: user.id, expenses: data })
+      const anomalyRes = await axios.post(`${ML_URL}/anomalies`, { user_id: user.id, expenses: data })
       setAnomalies(anomalyRes.data.anomalies || [])
 
-      const suggestRes = await axios.post('http://localhost:8000/suggestions', { user_id: user.id, expenses: data })
+      const suggestRes = await axios.post(`${ML_URL}/suggestions`, { user_id: user.id, expenses: data })
       setSuggestions(suggestRes.data.suggestions || [])
     } catch (err) {
       setMlError(true)
@@ -131,7 +134,6 @@ function Dashboard() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-white">Financial Overview</h1>
@@ -148,7 +150,6 @@ function Dashboard() {
           </button>
         </div>
 
-        {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <StatCard
             icon={Wallet}
@@ -180,7 +181,6 @@ function Dashboard() {
           />
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
             <h2 className="text-lg font-medium text-white mb-4">By Category</h2>
@@ -231,10 +231,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-          {/* Recent Expenses */}
           <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-medium text-white">Recent Expenses</h2>
@@ -273,7 +270,6 @@ function Dashboard() {
             )}
           </div>
 
-          {/* AI Panel */}
           <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-6">
             <div className="flex items-center gap-2 mb-5">
               <h2 className="text-lg font-medium text-white">AI Insights</h2>
