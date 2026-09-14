@@ -6,6 +6,7 @@ import {
 } from "@clerk/clerk-react";
 
 import Navbar from "./components/Navbar";
+import ChatWidget from "./components/ChatWidget";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Insights from "./pages/Insights";
@@ -18,6 +19,7 @@ function ProtectedRoute({ children }) {
       <SignedIn>
         <Navbar />
         {children}
+        <ChatWidget />
       </SignedIn>
 
       <SignedOut>
@@ -53,14 +55,16 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route 
-        path="/analytics"
-        element={
-          <SignedIn>
-            <Analytics />
-          </SignedIn> 
-                }
-                />
+
+        {/* Protected Analytics Page */}
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Insights Page */}
         <Route
