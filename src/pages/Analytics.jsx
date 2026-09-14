@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useUser } from "@clerk/clerk-react";
 import {
   PieChart,
@@ -12,7 +12,9 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-import { Wallet, Receipt, Tag, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Wallet, Receipt, Tag, TrendingUp, TrendingDown, Minus, Share2, Loader2 } from "lucide-react";
+import html2canvas from "html2canvas";
+import ShareSummaryCard from "../components/ShareSummaryCard";
 
 export default function Analytics() {
   const { user } = useUser();
@@ -20,6 +22,9 @@ export default function Analytics() {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sharing, setSharing] = useState(false);
+
+  const shareCardRef = useRef(null);
 
   useEffect(() => {
     if (!user) {
@@ -206,6 +211,29 @@ export default function Analytics() {
   ];
 
   // =========================================================
+  // SHARE HANDLER
+  // =========================================================
+
+  const handleShare = async () => {
+    if (!shareCardRef.current) return;
+    setSharing(true);
+    try {
+      const canvas = await html2canvas(shareCardRef.current, {
+        backgroundColor: null,
+        scale: 2, // sharper image
+      });
+      const link = document.createElement("a");
+      link.download = `fino-ai-summary-${currentMonthName.toLowerCase()}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (err) {
+      console.error("Failed to generate share image:", err);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  // =========================================================
   // TREND BADGE (used in stat card + comparison section)
   // =========================================================
 
@@ -245,11 +273,31 @@ export default function Analytics() {
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* HEADER */}
-        <div>
-          <h1 className="text-2xl font-semibold text-white">Analytics</h1>
-          <p className="text-slate-400 text-sm mt-1">
-            Understand your spending patterns and financial habits.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-white">Analytics</h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Understand your spending patterns and financial habits.
+            </p>
+          </div>
+
+          <button
+            onClick={handleShare}
+            disabled={sharing || expenses.length === 0}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-slate-950 font-medium text-sm self-start"
+          >
+            {sharing ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Share2 size={16} />
+                Share Summary
+              </>
+            )}
+          </button>
         </div>
 
         {/* ERROR BANNER */}
@@ -615,6 +663,18 @@ export default function Analytics() {
             </div>
           </div>
         )}
+
+        {/* HIDDEN SHARE CARD — rendered off-screen, captured by html2canvas */}
+        <div style={{ position: "fixed", top: -9999, left: -9999 }}>
+          <ShareSummaryCard
+            ref={shareCardRef}
+            totalSpent={totalSpent}
+            highestCategory={highestCategory}
+            categoryData={categoryData}
+            currentMonthSpending={currentMonthSpending}
+            currentMonthName={currentMonthName}
+          />
+        </div>
       </div>
     </div>
   );
